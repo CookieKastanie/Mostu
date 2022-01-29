@@ -1,70 +1,55 @@
-import { useContext, useEffect, useState } from 'react';
 import { Mostu } from '../services/Mostu';
 import './Grid.css';
-import { MostuContext } from './MostuContext';
 
+const stateToClassName = state => {
+    switch (state) {
+        case Mostu.VALID:
+            return 'LettreTrouve';
 
-const checkKey = key => {
-    if( key.length === 1 && ((key >= "A" && key <= "Z") || (key >= "a" && key <= "z"))){
-        return key
-    } else return ""
-}
-
-const stateToClassName= state => {
-    if(state === Mostu.VALID){
-        return "LettreTrouve"
-    }else if(state === Mostu.MISPLACED){
-        return "LettreMauvaisePlace"
-    }   return ""
-}
-
-const Line = ({word}) =>{
-let cellNum = 0;
+        case Mostu.MISPLACED:
+            return 'LettreMauvaisePlace';
     
+        default:
+            return '';
+    }
+}
+
+const Line = ({word, override}) =>{
+    const letters = [];
+    for(let i = 0; i < word.length; ++i) {
+        const infos = word[i];
+        if(i < override.length) {
+            if(override[i] !== infos.letter) {
+                infos.state = Mostu.INVALID;
+                infos.letter = override[i];
+            }
+        }
+
+        letters.push(<td className={stateToClassName(infos.state)} key={i}>{infos.letter}</td>);
+    }
+
     return <>
         <tr>
-            {word.map(infos => <td className={stateToClassName(infos.state)} key={cellNum++}>{infos.letter}</td>)}
+            {letters}
         </tr>
     </>
 }
 
-const createLines = grid => {
+export const Grid = ({grid, buffer}) => {
     let lines = [];
     for(let i = 0; i < grid.getHeight(); ++i) {
-        lines.push(<Line word={grid.getLine(i)} key={i} />);
+        let override = '';
+        if(i === grid.getCurrentLineIndex()) override = buffer;
+        lines.push(<Line word={grid.getLine(i)} override={override} key={i}/>);
     }
-  
-    return lines;
-  }
-
-export const Grid = () => {
-    const mostu = useContext(MostuContext);
-    console.log(mostu)
-    const [buffer, setBuffer] = useState("");
-    
-    useEffect(() => {
-        
-        const onKeyPress = event =>{
-            let key = event.key;
-            setBuffer(buffer + checkKey(key));
-        }
-
-        window.addEventListener("keypress", onKeyPress);
-        return () => {
-            window.removeEventListener("keypress", onKeyPress);
-        }
-    })
-
 
     return <>
-    {buffer}
         <section id="grille">
             <table>
                 <tbody>
-                    {createLines(mostu.getGrid())}            
+                    {lines}            
                 </tbody>
             </table>
         </section>
-        
     </>;
 }

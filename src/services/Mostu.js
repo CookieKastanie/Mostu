@@ -59,6 +59,10 @@ class Grid {
         return this.getLine(this.currentLine);
     }
 
+    getCurrentLineIndex() {
+        return this.currentLine;
+    }
+
     isLastLine() {
         return this.currentLine === this.height - 1;
     }
@@ -130,6 +134,10 @@ export class Mostu {
         return this.tryCount;
     }
 
+    getFirstLetter() {
+        return this.word[0];
+    }
+
     onWin(cb = () => {}) {
         this.winCb = cb;
     }
@@ -187,19 +195,25 @@ export class Mostu {
 
         let win = true;
         const line = this.grid.getCurrentLine();
+
+        const mapCount = new Map();
+        for(const w of this.word) mapCount.set(w, 0);
+        for(const w of this.word) mapCount.set(w, mapCount.get(w) + 1);
+
         for(let i = 0; i < this.getLength(); ++i) {
             line[i].letter = word[i];
             line[i].state = Mostu.INVALID;
 
             if(word[i] === this.word[i]) {
                 line[i].state = Mostu.VALID;
+                mapCount.set(word[i], mapCount.get(word[i]) - 1);
             } else {
                 win = false;
 
                 for(let j = 0; j < this.getLength(); ++j) {
-                    if(line[j].state === Mostu.INVALID
-                        && word[i] === this.word[j]) {
-
+                    const count = mapCount.get(word[i]) || 0;
+                    if(count > 0 && word[i] === this.word[j]) {
+                        mapCount.set(word[i], count - 1);
                         line[i].state = Mostu.MISPLACED;
                         break;
                     }

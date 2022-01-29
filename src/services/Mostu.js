@@ -12,16 +12,36 @@ class Grid {
             const line = new Array(this.width);
             line.fill({
                 state: Mostu.WAITING,
-                letter: '.'
+                letter: ' '
             });
 
             this.grid.push(line);
         }
     }
 
+    getWidth() {
+        return this.width;
+    }
+
+    getHeight() {
+        return this.height;
+    }
+
+    at(x, y) {
+        return this.grid[y][x];
+    }
+
     setCurrentLine(line) {
-        for(let i = 0; i < Math.min(line.length, this.width); ++i) {
+        const count = Math.min(line.length, this.width);
+        for(let i = 0; i < count; ++i) {
             this.grid[this.currentLine][i] = {...line[i]};
+        }
+
+        for(let i = count; i < this.width; ++i) {
+            this.grid[this.currentLine][i] = {
+                state: Mostu.WAITING,
+                letter: '.'
+            };
         }
     }
 
@@ -42,6 +62,10 @@ class Grid {
         if(this.isLastLine()) return false;
         ++this.currentLine;
         return true;
+    }
+
+    getGrid() {
+        return this.grid;
     }
 
     print() {

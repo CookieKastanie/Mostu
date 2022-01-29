@@ -241,7 +241,7 @@ export class Mostu {
     }
 
     getGrid() {
-        return this.grid.getGrid();
+        return this.grid;
     }
 
     printGrid() {

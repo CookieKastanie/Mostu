@@ -188,7 +188,9 @@ export class Mostu {
                 win = false;
 
                 for(let j = 0; j < this.getLength(); ++j) {
-                    if(line[j].state === Mostu.INVALID && word[i] === this.word[j]) {
+                    if(line[j].state === Mostu.INVALID
+                        && word[i] === this.word[j]) {
+
                         line[i].state = Mostu.MISPLACED;
                         break;
                     }

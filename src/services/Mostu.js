@@ -1,25 +1,91 @@
 import { words } from '../data/words';
 
+class Grid {
+    constructor(x, y) {
+        this.width = x;
+        this.height = y;
+
+        this.currentLine = 0;
+        this.grid = [];
+
+        for(let i = 0; i < this.height; ++i) {
+            const line = new Array(this.width);
+            line.fill({
+                state: Mostu.WAITING,
+                letter: '.'
+            });
+
+            this.grid.push(line);
+        }
+    }
+
+    setCurrentLine(line) {
+        for(let i = 0; i < Math.min(line.length, this.width); ++i) {
+            this.grid[this.currentLine][i] = {...line[i]};
+        }
+    }
+
+    getCurrentLine() {
+        const line = new Array(this.width);
+        for(let i = 0; i < this.width; ++i) {
+            line[i] = {...this.grid[this.currentLine][i]};
+        }
+
+        return line;
+    }
+
+    isLastLine() {
+        return this.currentLine === this.height - 1;
+    }
+
+    moveNextLine() {
+        if(this.isLastLine()) return false;
+        ++this.currentLine;
+        return true;
+    }
+
+    print() {
+        for(let y = 0; y < this.height; ++y) {
+            let line = `%c${y + 1} `;
+            let css = ['background: #FFF; color: #000;'];
+
+            for(let x = 0; x < this.width; ++x) {
+                const cell = this.grid[y][x];
+
+                line += `%c${cell.letter}`;
+                switch (cell.state) {
+                    case Mostu.VALID:
+                        css.push('background: #E44; color: #FFF;');
+                        break;
+
+                    case Mostu.MISPLACED:
+                        css.push('background: #EE4; color: #000;');
+                        break;
+
+                    default:
+                        css.push('background: #44E; color: #FFF;');
+                        break;
+                }
+            }
+
+            console.log(line, ...css);
+        }
+    }
+}
+
 export class Mostu {
-    constructor(maxTry = 6) {
+    constructor(tryCount = 6) {
         const w = words[Math.floor(Math.random() * words.length)];
         this.word = w.split('');
         
-        this.maxTry = maxTry;
+        this.tryCount = tryCount;
 
-        this.grid = [];
+        this.grid = new Grid(this.getLength(), tryCount);
 
-        const line = new Array(this.getLength());
-        line.fill({
-            state: Mostu.WAITING,
-            letter: '.'
-        });
-
-        line[0] = {
+        this.grid.setCurrentLine([{
             state: Mostu.VALID,
             letter: this.word[0]
-        };
-        this.grid.push(line);
+        }]);
 
         this.onWin();
         this.onLose();
@@ -29,6 +95,10 @@ export class Mostu {
 
     getLength() {
         return this.word.length;
+    }
+
+    getTryCount() {
+        return this.tryCount;
     }
 
     onWin(cb = () => {}) {
@@ -43,85 +113,95 @@ export class Mostu {
         return this.finished;
     }
 
-    tryWord(w) {
+    _processWord(word) {
+        if(typeof word !== 'string') return {
+            valid: false,
+            msg: 'Invalid input state.'
+        };
+
+        if(word.length !== this.getLength()) return {
+            valid: false,
+            msg: `Le mot n'est pas de la bonne taille.`
+        };
+
+        word = word.toUpperCase();
+        word = words.find(w => word === w);
+
+        if(!word) return {
+            valid: false,
+            msg: `Le mot n'est pas dans le dictionnaire.`
+        };
+
+        word = word.split('');
+
+        return {
+            valid: true,
+            msg: `Le mot n'est pas de la bonne taille.`,
+            word
+        }; 
+    }
+
+    tryWord(word) {
         if(this.finished) return {
             valid: false,
             msg: 'Le jeu est fini.'
         };
 
-        if(typeof w !== 'string') return {
-            valid: false,
-            msg: 'Invalid input state.'
-        };
-
-        if(w.length !== this.getLength()) return {
-            valid: false,
-            msg: `Le mot n'est pas de la bonne taille.`
-        };
-
-        w = w.toUpperCase();
-        w = words.find(i => w === i);
-
-        if(!w) return {
-            valid: false,
-            msg: `Le mot n'est pas dans le dictionnaire.`
-        };
-
-        w = w.split('');
+        const processResult = this._processWord(word);
+        if(!processResult.valid) return processResult;
+        word = processResult.word;
 
         let win = true;
-        const lastGridLine = this.grid[this.grid.length - 1];
-        const line = [];
+        const line = this.grid.getCurrentLine();
         for(let i = 0; i < this.getLength(); ++i) {
-            const o = {
-                state: Mostu.INVALID,
-                letter: w[i]
-            };
+            line[i].letter = word[i];
+            line[i].state = Mostu.INVALID;
 
-            if(w[i] === this.word[i]) {
-                o.state = Mostu.VALID;
+            if(word[i] === this.word[i]) {
+                line[i].state = Mostu.VALID;
             } else {
                 win = false;
 
                 for(let j = 0; j < this.getLength(); ++j) {
-                    if(w[i] === this.word[j] && lastGridLine[j].state === Mostu.WAITING) {
-                        o.state = Mostu.MISPLACED;
+                    if(line[j].state === Mostu.INVALID && word[i] === this.word[j]) {
+                        line[i].state = Mostu.MISPLACED;
+                        break;
                     }
                 }
             }
-
-            line.push(o);
         }
 
-        // ajout nouvelle ligne
+        const oldLine = this.grid.getCurrentLine();
         const newLine = []
         for(let i = 0; i < this.getLength(); ++i) {
-            if(lastGridLine[i].state === Mostu.VALID) {
-                newLine.push({
-                    state: Mostu.VALID,
-                    letter: lastGridLine[i].letter
-                });
-            } else if(line[i].state === Mostu.VALID) {
-                newLine.push({
-                    state: Mostu.VALID,
-                    letter: line[i].letter
-                });
-            } else {
-                newLine.push({
-                    state: Mostu.WAITING,
-                    letter: '.'
-                });
+            const cell = {
+                state: Mostu.WAITING,
+                letter: '.'
             }
 
-            lastGridLine[i] = {...line[i]};
+            if(oldLine[i].state === Mostu.VALID) {
+                cell.state = Mostu.VALID;
+                cell.letter = oldLine[i].letter;
+            } else if(line[i].state === Mostu.VALID) {
+                cell.state = Mostu.VALID;
+                cell.letter = line[i].letter;
+            }
+
+            newLine.push(cell);
         }
 
-        const lose = (this.grid.length) === this.maxTry;
+        this.grid.setCurrentLine(line);
 
-        if(!win && !lose) this.grid.push(newLine);
-        else this.finished = true;
-        if(win) this.winCb();
-        else if(lose) this.loseCb();
+        if(win) {
+            this.winCb();
+            this.finished = true;
+        } else if(this.grid.isLastLine()) {
+            this.loseCb();
+            this.finished = true;
+        } else {
+            this.grid.moveNextLine();
+            this.grid.setCurrentLine(newLine);
+        }
 
         return {
             valid: true,
@@ -130,28 +210,7 @@ export class Mostu {
     }
 
     printGrid() {
-        for(let i = 0; i < this.grid.length; ++i) {
-            let line = '';
-            let css = [];
-
-            for(let j = 0; j < this.getLength(); ++j) {
-                line += `%c${this.grid[i][j].letter}`;
-                switch (this.grid[i][j].state) {
-                    case Mostu.VALID:
-                        css.push('background: #E44; color: #FFF;');
-                        break;
-                    case Mostu.MISPLACED:
-                        css.push('background: #EE4; color: #000;');
-                        break;
-
-                    default:
-                        css.push('background: #44E; color: #FFF;');
-                        break;
-                }
-            }
-
-            console.log(line, ...css);
-        }
+        this.grid.print();
     }
 }
 

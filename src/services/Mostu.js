@@ -1,4 +1,5 @@
 import { words } from '../data/words';
+import { dictionary } from '../data/dictionary';
 
 class Grid {
     constructor(x, y) {
@@ -149,7 +150,7 @@ export class Mostu {
         };
 
         word = word.toUpperCase();
-        word = words.find(w => word === w);
+        word = dictionary.find(w => word === w);
 
         if(!word) return {
             valid: false,

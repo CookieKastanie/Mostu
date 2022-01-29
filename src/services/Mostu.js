@@ -240,6 +240,10 @@ export class Mostu {
         }
     }
 
+    getGrid() {
+        return this.grid.getGrid();
+    }
+
     printGrid() {
         this.grid.print();
     }

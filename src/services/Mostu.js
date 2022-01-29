@@ -46,13 +46,17 @@ class Grid {
         }
     }
 
-    getCurrentLine() {
+    getLine(index) {
         const line = new Array(this.width);
         for(let i = 0; i < this.width; ++i) {
-            line[i] = {...this.grid[this.currentLine][i]};
+            line[i] = {...this.grid[index][i]};
         }
 
         return line;
+    }
+
+    getCurrentLine() {
+        return this.getLine(this.currentLine);
     }
 
     isLastLine() {

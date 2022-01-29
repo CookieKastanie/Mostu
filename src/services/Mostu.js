@@ -163,9 +163,14 @@ export class Mostu {
 
         word = word.split('');
 
+        if(word[0] !== this.word[0]) return {
+            valid: false,
+            msg: `La première lettre est incorrecte.`
+        }
+
         return {
             valid: true,
-            msg: `Le mot n'est pas de la bonne taille.`,
+            msg: ``,
             word
         }; 
     }

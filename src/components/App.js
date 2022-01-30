@@ -34,9 +34,11 @@ export const App = () => {
                     const result = mostu.tryWord(buffer);
                     if(result.valid) setBuffer('');
                     else {
-                        setMsg({text: '', className: ''});
+                        setMsg({text: result.msg, className: ''});
                         setTimeout(() => {
-                            setMsg({text: result.msg, className: 'toast'});
+                            setMsg(m => {
+                                return {...m, className: 'toast'};
+                            });
                         }, 0);
                     }
                     break;

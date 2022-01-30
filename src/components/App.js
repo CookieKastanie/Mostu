@@ -27,20 +27,28 @@ export const App = () => {
         setMsg({text: '', className: ''});
     }, []);
 
+    const printMessage = useCallback((text, persistant = false) => {
+        setMsg({text, className: ''});
+
+        if(!persistant)
+        setTimeout(() => {
+            setMsg(m => {
+                return {...m, className: 'toast'};
+            });
+        }, 0);
+    }, []);
+
     useEffect(() => {
         const onKeyPress = ({key}) => {
             switch (key) {
                 case 'Enter':
                     const result = mostu.tryWord(buffer);
                     if(result.valid) setBuffer('');
-                    else {
-                        setMsg({text: result.msg, className: ''});
-                        setTimeout(() => {
-                            setMsg(m => {
-                                return {...m, className: 'toast'};
-                            });
-                        }, 0);
-                    }
+                    else printMessage(result.msg);
+
+                    const status = mostu.getStatus();
+                    if(status.lose)
+                        printMessage(`Dommage, le mot était "${status.anwser}".`, true);
                     break;
 
                 case 'Backspace':
@@ -61,12 +69,12 @@ export const App = () => {
 
         window.addEventListener('keydown', onKeyPress);
         return () => window.removeEventListener('keydown', onKeyPress);
-    }, [mostu, buffer, reset]);
+    }, [mostu, buffer, printMessage, reset]);
 
     return <>
         <h1>Mostu</h1>
         <button onClick={reset}>Rejouer</button>
         <p className={msg.className}>{msg.text}</p>
-        <Grid grid={mostu.getGrid()} buffer={!mostu.isFinished() ? buffer : null}></Grid>
+        <Grid grid={mostu.getGrid()} buffer={!mostu.getStatus().finished ? buffer : null}></Grid>
     </>;
 }

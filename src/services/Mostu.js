@@ -120,10 +120,11 @@ export class Mostu {
             letter: this.word[0]
         }]);
 
-        this.onWin();
-        this.onLose();
-
-        this.finished = false;
+        this.status = {
+            finished: false,
+            win: false,
+            lose: false
+        }
     }
 
     getLength() {
@@ -138,16 +139,8 @@ export class Mostu {
         return this.word[0];
     }
 
-    onWin(cb = () => {}) {
-        this.winCb = cb;
-    }
-
-    onLose(cb = () => {}) {
-        this.loseCb = cb;
-    }
-
-    isFinished() {
-        return this.finished;
+    getStatus() {
+        return {...this.status};
     }
 
     _processWord(word) {
@@ -184,8 +177,8 @@ export class Mostu {
     }
 
     tryWord(word) {
-        if(this.finished) return {
-            valid: false,
+        if(this.status.finished) return {
+            valid: true,
             msg: 'Le jeu est fini.'
         };
 
@@ -246,11 +239,12 @@ export class Mostu {
         this.grid.setCurrentLine(line);
 
         if(win) {
-            this.winCb();
-            this.finished = true;
+            this.status.win = true;
+            this.status.finished = true;
         } else if(this.grid.isLastLine()) {
-            this.loseCb();
-            this.finished = true;
+            this.status.lose = true;
+            this.status.finished = true;
+            this.status.anwser = this.word.join('');
         } else {
             this.grid.moveNextLine();
             this.grid.setCurrentLine(newLine);

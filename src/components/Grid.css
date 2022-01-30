@@ -42,7 +42,7 @@ td {
 }
 
 .misplaced-letter {
-    background-color: orange;
+    background-color: #ffa500;
     background-clip: padding-box;
     line-height: 75px;
     border-radius: 100%;

@@ -74,8 +74,8 @@ export const App = () => {
     }, [mostu, buffer, printMessage, reset]);
 
     return <>
-        <button tabIndex='-1' id='reset-button' onClick={reset}>&#128472;</button>
         <div id='message-container' className={msg.className}>{msg.text}</div>
         <Grid grid={mostu.getGrid()} buffer={!mostu.getStatus().finished ? buffer : null}></Grid>
+        <div id="btn-placing"><button tabIndex='-1' id='reset-button' onClick={reset}>Nouveau mot</button></div>
     </>;
 }

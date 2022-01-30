@@ -5,11 +5,12 @@ import { Grid } from './Grid';
 import { useCallback, useEffect, useState } from 'react';
 
 const checkKey = key => {
-    if(key.length === 1
-        && ((key >= 'A' && key <= 'Z')
-        || (key >= 'a' && key <= 'z'))) {
-            
-        return key.toUpperCase();
+    if(key.length === 1) {
+        key = key.normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+
+        if(key >= 'A' && key <= 'Z') return key;
     }
 
     return '';
@@ -17,27 +18,37 @@ const checkKey = key => {
 
 export const App = () => {
     const [mostu, setMostu] = useState(() => new Mostu());
-    const [buffer, setBuffer] = useState(mostu.getFirstLetter());
+    const [buffer, setBuffer] = useState('');
+    const [msg, setMsg] = useState({text: '', className: ''});
+
+    const reset = useCallback(() => {
+        setMostu(new Mostu());
+        setBuffer('');
+        setMsg({text: '', className: ''});
+    }, []);
 
     useEffect(() => {
         const onKeyPress = ({key}) => {
             switch (key) {
                 case 'Enter':
-                    /*setBuffer(buffer => {
-                        const result = mostu.tryWord(buffer);
-                        if(result.valid) return '';
-                        else return buffer;
-                    });*/
-
                     const result = mostu.tryWord(buffer);
-                    if(result.valid) setBuffer(mostu.getFirstLetter());
-                    else console.log(result.msg);
+                    if(result.valid) setBuffer('');
+                    else {
+                        setMsg({text: '', className: ''});
+                        setTimeout(() => {
+                            setMsg({text: result.msg, className: 'toast'});
+                        }, 0);
+                    }
                     break;
 
                 case 'Backspace':
                     setBuffer(buffer => buffer.slice(0, -1));
                     break;
             
+                case 'Escape':
+                    reset();
+                    break;
+
                 default:
                     if(buffer.length < mostu.getLength()) {
                         setBuffer(buffer => buffer + checkKey(key));
@@ -48,16 +59,12 @@ export const App = () => {
 
         window.addEventListener('keydown', onKeyPress);
         return () => window.removeEventListener('keydown', onKeyPress);
-    }, [mostu, buffer]);
-
-    const reset = useCallback(() => {
-        setMostu(new Mostu());
-        setBuffer('');
-    }, []);
+    }, [mostu, buffer, reset]);
 
     return <>
         <h1>Mostu</h1>
         <button onClick={reset}>Rejouer</button>
-        <Grid grid={mostu.getGrid()} buffer={!mostu.isFinished() ? buffer : ''}></Grid>
+        <p className={msg.className}>{msg.text}</p>
+        <Grid grid={mostu.getGrid()} buffer={!mostu.isFinished() ? buffer : null}></Grid>
     </>;
 }

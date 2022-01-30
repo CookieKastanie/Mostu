@@ -4,10 +4,10 @@ import './Grid.css';
 const stateToClassName = state => {
     switch (state) {
         case Mostu.VALID:
-            return 'LettreTrouve';
+            return 'valid-letter';
 
         case Mostu.MISPLACED:
-            return 'LettreMauvaisePlace';
+            return 'misplaced-letter';
     
         default:
             return '';
@@ -18,14 +18,20 @@ const Line = ({word, override}) =>{
     const letters = [];
     for(let i = 0; i < word.length; ++i) {
         const infos = word[i];
-        if(i < override.length) {
-            if(override[i] !== infos.letter) {
-                infos.state = Mostu.INVALID;
-                infos.letter = override[i];
+        let classes = stateToClassName(infos.state);
+
+        if(override !== null) {
+            if(i < override.length) {
+                if(override[i] !== infos.letter) {
+                    infos.state = Mostu.INVALID;
+                    infos.letter = override[i];
+                }
+            } else {
+                classes += ' darken';
             }
         }
 
-        letters.push(<td className={stateToClassName(infos.state)} key={i}>{infos.letter}</td>);
+        letters.push(<td className={classes} key={i}>{infos.letter}</td>);
     }
 
     return <>
@@ -38,13 +44,13 @@ const Line = ({word, override}) =>{
 export const Grid = ({grid, buffer}) => {
     let lines = [];
     for(let i = 0; i < grid.getHeight(); ++i) {
-        let override = '';
+        let override = null;
         if(i === grid.getCurrentLineIndex()) override = buffer;
         lines.push(<Line word={grid.getLine(i)} override={override} key={i}/>);
     }
 
     return <>
-        <section id="grille">
+        <section id="grid">
             <table>
                 <tbody>
                     {lines}            

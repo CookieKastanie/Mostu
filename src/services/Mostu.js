@@ -209,15 +209,18 @@ export class Mostu {
                 mapCount.set(word[i], mapCount.get(word[i]) - 1);
             } else {
                 win = false;
+            }
+        }
 
-                for(let j = 0; j < this.getLength(); ++j) {
-                    const count = mapCount.get(word[i]) || 0;
-                    if(count > 0 && word[i] === this.word[j]) {
-                        mapCount.set(word[i], count - 1);
-                        line[i].state = Mostu.MISPLACED;
-                        break;
-                    }
-                }
+        for(let i = 0; i < this.getLength(); ++i)
+        for(let j = 0; j < this.getLength(); ++j) {
+            const count = mapCount.get(word[i]) || 0;
+            if(line[i].state !== Mostu.VALID &&
+                count > 0 && word[i] === this.word[j]) {
+
+                mapCount.set(word[i], count - 1);
+                line[i].state = Mostu.MISPLACED;
+                break;
             }
         }
 

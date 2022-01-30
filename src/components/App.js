@@ -21,10 +21,12 @@ export const App = () => {
     const [buffer, setBuffer] = useState('');
     const [msg, setMsg] = useState({text: '', className: ''});
 
-    const reset = useCallback(() => {
+    const reset = useCallback(e => {
         setMostu(new Mostu());
         setBuffer('');
         setMsg({text: '', className: ''});
+
+        if(e) e.target.blur();
     }, []);
 
     const printMessage = useCallback((text, persistant = false) => {
@@ -48,7 +50,7 @@ export const App = () => {
 
                     const status = mostu.getStatus();
                     if(status.lose)
-                        printMessage(`Dommage, le mot était "${status.anwser}".`, true);
+                        printMessage(`Dommage, le mot était «${status.anwser}».`, true);
                     break;
 
                 case 'Backspace':
@@ -72,9 +74,8 @@ export const App = () => {
     }, [mostu, buffer, printMessage, reset]);
 
     return <>
-        <h1>Mostu</h1>
-        <button onClick={reset}>Rejouer</button>
-        <p className={msg.className}>{msg.text}</p>
+        <button tabIndex='-1' id='reset-button' onClick={reset}>&#128472;</button>
+        <div id='message-container' className={msg.className}>{msg.text}</div>
         <Grid grid={mostu.getGrid()} buffer={!mostu.getStatus().finished ? buffer : null}></Grid>
     </>;
 }

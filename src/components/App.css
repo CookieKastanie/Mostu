@@ -5,6 +5,31 @@ body {
     padding:0;
     background-color:#0d131c;
     color:white;
+    user-select: none;
+}
+
+#message-container {
+    font-family: Arial;
+    font-size: 1.5em;
+    height: 1.5em;
+    margin: 1.5em 0;
+    width: 100%;
+    text-align: center;
+}
+
+#reset-button {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+}
+
+#reset-button:hover {
+    cursor: pointer;
+}
+
+#reset-button:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 @keyframes fadeout {
@@ -12,7 +37,7 @@ body {
         opacity: 100%;
     }
 
-    50% {
+    80% {
         opacity: 100%;
     }
 
@@ -23,6 +48,6 @@ body {
 
 .toast {
     opacity: 0%;
-    animation: fadeout 4s;
+    animation: fadeout 3s;
 }
 

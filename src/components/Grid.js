@@ -18,7 +18,7 @@ const Line = ({word, override}) =>{
     const letters = [];
     for(let i = 0; i < word.length; ++i) {
         const infos = word[i];
-        let classes = stateToClassName(infos.state);
+        let classes = '';
 
         if(override !== null) {
             if(i < override.length) {
@@ -27,9 +27,11 @@ const Line = ({word, override}) =>{
                     infos.letter = override[i];
                 }
             } else {
-                classes += ' darken';
+                classes += 'darken ';
             }
         }
+
+        classes += stateToClassName(infos.state);
 
         letters.push(<td className={classes} key={i}>{infos.letter}</td>);
     }

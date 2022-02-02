@@ -35,6 +35,7 @@ td {
     font-weight:600;
     user-select: none;
     text-transform: uppercase;
+    background-clip: padding-box;
 }
 
 .valid-letter {
